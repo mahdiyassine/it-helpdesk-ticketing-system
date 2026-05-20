@@ -1,0 +1,147 @@
+@startuml
+
+hide circle
+skinparam linetype ortho
+
+entity roles {
+  * role_id : SERIAL <<PK>>
+  --
+  role_name : VARCHAR(50)
+}
+
+entity users {
+  * user_id : SERIAL <<PK>>
+  --
+  full_name : VARCHAR(100)
+  email : VARCHAR(150)
+  password_hash : VARCHAR(255)
+  role_id : INT <<FK>>
+  is_active : BOOLEAN
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity categories {
+  * category_id : SERIAL <<PK>>
+  --
+  category_name : VARCHAR(100)
+}
+
+entity priorities {
+  * priority_id : SERIAL <<PK>>
+  --
+  priority_name : VARCHAR(50)
+}
+
+entity statuses {
+  * status_id : SERIAL <<PK>>
+  --
+  status_name : VARCHAR(50)
+}
+
+entity tickets {
+  * ticket_id : SERIAL <<PK>>
+  --
+  ticket_reference : VARCHAR(50)
+  title : VARCHAR(150)
+  description : TEXT
+  created_by : INT <<FK>>
+  assigned_to : INT <<FK>>
+  category_id : INT <<FK>>
+  priority_id : INT <<FK>>
+  status_id : INT <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+  resolved_at : TIMESTAMP
+  closed_at : TIMESTAMP
+}
+
+entity ticket_comments {
+  * comment_id : SERIAL <<PK>>
+  --
+  ticket_id : INT <<FK>>
+  user_id : INT <<FK>>
+  comment_text : TEXT
+  is_internal : BOOLEAN
+  created_at : TIMESTAMP
+}
+
+entity ticket_attachments {
+  * attachment_id : SERIAL <<PK>>
+  --
+  ticket_id : INT <<FK>>
+  uploaded_by : INT <<FK>>
+  file_name : VARCHAR(255)
+  file_path : VARCHAR(255)
+  file_type : VARCHAR(100)
+  file_size : INT
+  uploaded_at : TIMESTAMP
+}
+
+entity notifications {
+  * notification_id : SERIAL <<PK>>
+  --
+  user_id : INT <<FK>>
+  ticket_id : INT <<FK>>
+  message : TEXT
+  is_read : BOOLEAN
+  created_at : TIMESTAMP
+}
+
+entity ticket_assignment_history {
+  * assignment_id : SERIAL <<PK>>
+  --
+  ticket_id : INT <<FK>>
+  assigned_from : INT <<FK>>
+  assigned_to : INT <<FK>>
+  assigned_by : INT <<FK>>
+  assigned_at : TIMESTAMP
+}
+
+entity ticket_status_history {
+  * history_id : SERIAL <<PK>>
+  --
+  ticket_id : INT <<FK>>
+  old_status_id : INT <<FK>>
+  new_status_id : INT <<FK>>
+  changed_by : INT <<FK>>
+  changed_at : TIMESTAMP
+}
+
+entity activity_logs {
+  * log_id : SERIAL <<PK>>
+  --
+  user_id : INT <<FK>>
+  action : VARCHAR(150)
+  description : TEXT
+  created_at : TIMESTAMP
+}
+
+roles ||--o{ users
+
+users ||--o{ tickets : creates
+users ||--o{ tickets : assigned
+
+categories ||--o{ tickets
+priorities ||--o{ tickets
+statuses ||--o{ tickets
+
+tickets ||--o{ ticket_comments
+users ||--o{ ticket_comments
+
+tickets ||--o{ ticket_attachments
+users ||--o{ ticket_attachments
+
+users ||--o{ notifications
+tickets ||--o{ notifications
+
+tickets ||--o{ ticket_assignment_history
+users ||--o{ ticket_assignment_history
+
+tickets ||--o{ ticket_status_history
+statuses ||--o{ ticket_status_history
+users ||--o{ ticket_status_history
+
+users ||--o{ activity_logs
+
+@enduml
