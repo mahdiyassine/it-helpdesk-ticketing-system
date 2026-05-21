@@ -1,133 +1,133 @@
-CREATE TABLE roles (
-    role_id SERIAL PRIMARY KEY,
-    role_name VARCHAR(50) UNIQUE NOT NULL
+CREATE TABLE Roles (
+    Id SERIAL PRIMARY KEY,
+    RoleName VARCHAR(50) UNIQUE NOT NULL
 );
 
-CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,
-    full_name VARCHAR(100) NOT NULL,
-    email VARCHAR(150) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role_id INT NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(role_id)
+CREATE TABLE Users (
+    Id SERIAL PRIMARY KEY,
+    FullName VARCHAR(100) NOT NULL,
+    Email VARCHAR(150) UNIQUE NOT NULL,
+    PasswordHash VARCHAR(255) NOT NULL,
+    RoleId INT NOT NULL,
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (RoleId) REFERENCES Roles(Id)
 );
 
-CREATE TABLE categories (
-    category_id SERIAL PRIMARY KEY,
-    category_name VARCHAR(100) UNIQUE NOT NULL
+CREATE TABLE Categories (
+    Id SERIAL PRIMARY KEY,
+    CategoryName VARCHAR(100) UNIQUE NOT NULL
 );
 
-CREATE TABLE priorities (
-    priority_id SERIAL PRIMARY KEY,
-    priority_name VARCHAR(50) UNIQUE NOT NULL
+CREATE TABLE Priorities (
+    Id SERIAL PRIMARY KEY,
+    PriorityName VARCHAR(50) UNIQUE NOT NULL
 );
 
-CREATE TABLE statuses (
-    status_id SERIAL PRIMARY KEY,
-    status_name VARCHAR(50) UNIQUE NOT NULL
+CREATE TABLE Statuses (
+    Id SERIAL PRIMARY KEY,
+    StatusName VARCHAR(50) UNIQUE NOT NULL
 );
 
-CREATE TABLE tickets (
-    ticket_id SERIAL PRIMARY KEY,
-    ticket_reference VARCHAR(50) UNIQUE NOT NULL,
-    title VARCHAR(150) NOT NULL,
-    description TEXT NOT NULL,
-    created_by INT NOT NULL,
-    assigned_to INT,
-    category_id INT NOT NULL,
-    priority_id INT NOT NULL,
-    status_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    resolved_at TIMESTAMP,
-    closed_at TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(user_id),
-    FOREIGN KEY (assigned_to) REFERENCES users(user_id),
-    FOREIGN KEY (category_id) REFERENCES categories(category_id),
-    FOREIGN KEY (priority_id) REFERENCES priorities(priority_id),
-    FOREIGN KEY (status_id) REFERENCES statuses(status_id)
+CREATE TABLE Tickets (
+    Id SERIAL PRIMARY KEY,
+    TicketReference VARCHAR(50) UNIQUE NOT NULL,
+    Title VARCHAR(150) NOT NULL,
+    Description TEXT NOT NULL,
+    CreatedByUserId INT NOT NULL,
+    AssignedToUserId INT,
+    CategoryId INT NOT NULL,
+    PriorityId INT NOT NULL,
+    StatusId INT NOT NULL,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ResolvedAt TIMESTAMP,
+    ClosedAt TIMESTAMP,
+    FOREIGN KEY (CreatedByUserId) REFERENCES Users(Id),
+    FOREIGN KEY (AssignedToUserId) REFERENCES Users(Id),
+    FOREIGN KEY (CategoryId) REFERENCES Categories(Id),
+    FOREIGN KEY (PriorityId) REFERENCES Priorities(Id),
+    FOREIGN KEY (StatusId) REFERENCES Statuses(Id)
 );
 
-CREATE TABLE ticket_comments (
-    comment_id SERIAL PRIMARY KEY,
-    ticket_id INT NOT NULL,
-    user_id INT NOT NULL,
-    comment_text TEXT NOT NULL,
-    is_internal BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+CREATE TABLE TicketComments (
+    Id SERIAL PRIMARY KEY,
+    TicketId INT NOT NULL,
+    UserId INT NOT NULL,
+    CommentText TEXT NOT NULL,
+    IsInternal BOOLEAN DEFAULT FALSE,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (TicketId) REFERENCES Tickets(Id),
+    FOREIGN KEY (UserId) REFERENCES Users(Id)
 );
 
-CREATE TABLE ticket_attachments (
-    attachment_id SERIAL PRIMARY KEY,
-    ticket_id INT NOT NULL,
-    uploaded_by INT NOT NULL,
-    file_name VARCHAR(255) NOT NULL,
-    file_path VARCHAR(255) NOT NULL,
-    file_type VARCHAR(100),
-    file_size INT,
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id),
-    FOREIGN KEY (uploaded_by) REFERENCES users(user_id)
+CREATE TABLE TicketAttachments (
+    Id SERIAL PRIMARY KEY,
+    TicketId INT NOT NULL,
+    UploadedByUserId INT NOT NULL,
+    FileName VARCHAR(255) NOT NULL,
+    FilePath VARCHAR(255) NOT NULL,
+    FileType VARCHAR(100),
+    FileSize INT,
+    UploadedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (TicketId) REFERENCES Tickets(Id),
+    FOREIGN KEY (UploadedByUserId) REFERENCES Users(Id)
 );
 
-CREATE TABLE notifications (
-    notification_id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    ticket_id INT,
-    message TEXT NOT NULL,
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id)
+CREATE TABLE Notifications (
+    Id SERIAL PRIMARY KEY,
+    UserId INT NOT NULL,
+    TicketId INT,
+    Message TEXT NOT NULL,
+    IsRead BOOLEAN DEFAULT FALSE,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserId) REFERENCES Users(Id),
+    FOREIGN KEY (TicketId) REFERENCES Tickets(Id)
 );
 
-CREATE TABLE ticket_assignment_history (
-    assignment_id SERIAL PRIMARY KEY,
-    ticket_id INT NOT NULL,
-    assigned_from INT,
-    assigned_to INT NOT NULL,
-    assigned_by INT NOT NULL,
-    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id),
-    FOREIGN KEY (assigned_from) REFERENCES users(user_id),
-    FOREIGN KEY (assigned_to) REFERENCES users(user_id),
-    FOREIGN KEY (assigned_by) REFERENCES users(user_id)
+CREATE TABLE TicketAssignmentHistory (
+    Id SERIAL PRIMARY KEY,
+    TicketId INT NOT NULL,
+    AssignedFromUserId INT,
+    AssignedToUserId INT NOT NULL,
+    AssignedByUserId INT NOT NULL,
+    AssignedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (TicketId) REFERENCES Tickets(Id),
+    FOREIGN KEY (AssignedFromUserId) REFERENCES Users(Id),
+    FOREIGN KEY (AssignedToUserId) REFERENCES Users(Id),
+    FOREIGN KEY (AssignedByUserId) REFERENCES Users(Id)
 );
 
-CREATE TABLE ticket_status_history (
-    history_id SERIAL PRIMARY KEY,
-    ticket_id INT NOT NULL,
-    old_status_id INT,
-    new_status_id INT NOT NULL,
-    changed_by INT NOT NULL,
-    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id),
-    FOREIGN KEY (old_status_id) REFERENCES statuses(status_id),
-    FOREIGN KEY (new_status_id) REFERENCES statuses(status_id),
-    FOREIGN KEY (changed_by) REFERENCES users(user_id)
+CREATE TABLE TicketStatusHistory (
+    Id SERIAL PRIMARY KEY,
+    TicketId INT NOT NULL,
+    OldStatusId INT,
+    NewStatusId INT NOT NULL,
+    ChangedByUserId INT NOT NULL,
+    ChangedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (TicketId) REFERENCES Tickets(Id),
+    FOREIGN KEY (OldStatusId) REFERENCES Statuses(Id),
+    FOREIGN KEY (NewStatusId) REFERENCES Statuses(Id),
+    FOREIGN KEY (ChangedByUserId) REFERENCES Users(Id)
 );
 
-CREATE TABLE activity_logs (
-    log_id SERIAL PRIMARY KEY,
-    user_id INT,
-    action VARCHAR(150) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+CREATE TABLE ActivityLogs (
+    Id SERIAL PRIMARY KEY,
+    UserId INT,
+    Action VARCHAR(150) NOT NULL,
+    Description TEXT,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserId) REFERENCES Users(Id)
 );
 
-INSERT INTO roles (role_name) VALUES
+INSERT INTO Roles (RoleName) VALUES
 ('Admin'),
 ('IT Support Agent'),
 ('Employee'),
 ('Manager');
 
-INSERT INTO categories (category_name) VALUES
+INSERT INTO Categories (CategoryName) VALUES
 ('Hardware'),
 ('Software'),
 ('Network'),
@@ -135,13 +135,13 @@ INSERT INTO categories (category_name) VALUES
 ('Access Request'),
 ('Other');
 
-INSERT INTO priorities (priority_name) VALUES
+INSERT INTO Priorities (PriorityName) VALUES
 ('Low'),
 ('Medium'),
 ('High'),
 ('Critical');
 
-INSERT INTO statuses (status_name) VALUES
+INSERT INTO Statuses (StatusName) VALUES
 ('Open'),
 ('In Progress'),
 ('Pending'),
