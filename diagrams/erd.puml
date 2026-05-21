@@ -3,145 +3,145 @@
 hide circle
 skinparam linetype ortho
 
-entity roles {
-  * role_id : SERIAL <<PK>>
+entity Roles {
+  * Id : SERIAL <<PK>>
   --
-  role_name : VARCHAR(50)
+  RoleName : VARCHAR(50)
 }
 
-entity users {
-  * user_id : SERIAL <<PK>>
+entity Users {
+  * Id : SERIAL <<PK>>
   --
-  full_name : VARCHAR(100)
-  email : VARCHAR(150)
-  password_hash : VARCHAR(255)
-  role_id : INT <<FK>>
-  is_active : BOOLEAN
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  FullName : VARCHAR(100)
+  Email : VARCHAR(150)
+  PasswordHash : VARCHAR(255)
+  RoleId : INT <<FK>>
+  IsActive : BOOLEAN
+  CreatedAt : TIMESTAMP
+  UpdatedAt : TIMESTAMP
 }
 
-entity categories {
-  * category_id : SERIAL <<PK>>
+entity Categories {
+  * Id : SERIAL <<PK>>
   --
-  category_name : VARCHAR(100)
+  CategoryName : VARCHAR(100)
 }
 
-entity priorities {
-  * priority_id : SERIAL <<PK>>
+entity Priorities {
+  * Id : SERIAL <<PK>>
   --
-  priority_name : VARCHAR(50)
+  PriorityName : VARCHAR(50)
 }
 
-entity statuses {
-  * status_id : SERIAL <<PK>>
+entity Statuses {
+  * Id : SERIAL <<PK>>
   --
-  status_name : VARCHAR(50)
+  StatusName : VARCHAR(50)
 }
 
-entity tickets {
-  * ticket_id : SERIAL <<PK>>
+entity Tickets {
+  * Id : SERIAL <<PK>>
   --
-  ticket_reference : VARCHAR(50)
-  title : VARCHAR(150)
-  description : TEXT
-  created_by : INT <<FK>>
-  assigned_to : INT <<FK>>
-  category_id : INT <<FK>>
-  priority_id : INT <<FK>>
-  status_id : INT <<FK>>
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
-  resolved_at : TIMESTAMP
-  closed_at : TIMESTAMP
+  TicketReference : VARCHAR(50)
+  Title : VARCHAR(150)
+  Description : TEXT
+  CreatedByUserId : INT <<FK>>
+  AssignedToUserId : INT <<FK>>
+  CategoryId : INT <<FK>>
+  PriorityId : INT <<FK>>
+  StatusId : INT <<FK>>
+  CreatedAt : TIMESTAMP
+  UpdatedAt : TIMESTAMP
+  ResolvedAt : TIMESTAMP
+  ClosedAt : TIMESTAMP
 }
 
-entity ticket_comments {
-  * comment_id : SERIAL <<PK>>
+entity TicketComments {
+  * Id : SERIAL <<PK>>
   --
-  ticket_id : INT <<FK>>
-  user_id : INT <<FK>>
-  comment_text : TEXT
-  is_internal : BOOLEAN
-  created_at : TIMESTAMP
+  TicketId : INT <<FK>>
+  UserId : INT <<FK>>
+  CommentText : TEXT
+  IsInternal : BOOLEAN
+  CreatedAt : TIMESTAMP
 }
 
-entity ticket_attachments {
-  * attachment_id : SERIAL <<PK>>
+entity TicketAttachments {
+  * Id : SERIAL <<PK>>
   --
-  ticket_id : INT <<FK>>
-  uploaded_by : INT <<FK>>
-  file_name : VARCHAR(255)
-  file_path : VARCHAR(255)
-  file_type : VARCHAR(100)
-  file_size : INT
-  uploaded_at : TIMESTAMP
+  TicketId : INT <<FK>>
+  UploadedByUserId : INT <<FK>>
+  FileName : VARCHAR(255)
+  FilePath : VARCHAR(255)
+  FileType : VARCHAR(100)
+  FileSize : INT
+  UploadedAt : TIMESTAMP
 }
 
-entity notifications {
-  * notification_id : SERIAL <<PK>>
+entity Notifications {
+  * Id : SERIAL <<PK>>
   --
-  user_id : INT <<FK>>
-  ticket_id : INT <<FK>>
-  message : TEXT
-  is_read : BOOLEAN
-  created_at : TIMESTAMP
+  UserId : INT <<FK>>
+  TicketId : INT <<FK>>
+  Message : TEXT
+  IsRead : BOOLEAN
+  CreatedAt : TIMESTAMP
 }
 
-entity ticket_assignment_history {
-  * assignment_id : SERIAL <<PK>>
+entity TicketAssignmentHistory {
+  * Id : SERIAL <<PK>>
   --
-  ticket_id : INT <<FK>>
-  assigned_from : INT <<FK>>
-  assigned_to : INT <<FK>>
-  assigned_by : INT <<FK>>
-  assigned_at : TIMESTAMP
+  TicketId : INT <<FK>>
+  AssignedFromUserId : INT <<FK>>
+  AssignedToUserId : INT <<FK>>
+  AssignedByUserId : INT <<FK>>
+  AssignedAt : TIMESTAMP
 }
 
-entity ticket_status_history {
-  * history_id : SERIAL <<PK>>
+entity TicketStatusHistory {
+  * Id : SERIAL <<PK>>
   --
-  ticket_id : INT <<FK>>
-  old_status_id : INT <<FK>>
-  new_status_id : INT <<FK>>
-  changed_by : INT <<FK>>
-  changed_at : TIMESTAMP
+  TicketId : INT <<FK>>
+  OldStatusId : INT <<FK>>
+  NewStatusId : INT <<FK>>
+  ChangedByUserId : INT <<FK>>
+  ChangedAt : TIMESTAMP
 }
 
-entity activity_logs {
-  * log_id : SERIAL <<PK>>
+entity ActivityLogs {
+  * Id : SERIAL <<PK>>
   --
-  user_id : INT <<FK>>
-  action : VARCHAR(150)
-  description : TEXT
-  created_at : TIMESTAMP
+  UserId : INT <<FK>>
+  Action : VARCHAR(150)
+  Description : TEXT
+  CreatedAt : TIMESTAMP
 }
 
-roles ||--o{ users
+Roles ||--o{ Users
 
-users ||--o{ tickets : creates
-users ||--o{ tickets : assigned
+Users ||--o{ Tickets : CreatedByUserId
+Users ||--o{ Tickets : AssignedToUserId
 
-categories ||--o{ tickets
-priorities ||--o{ tickets
-statuses ||--o{ tickets
+Categories ||--o{ Tickets
+Priorities ||--o{ Tickets
+Statuses ||--o{ Tickets
 
-tickets ||--o{ ticket_comments
-users ||--o{ ticket_comments
+Tickets ||--o{ TicketComments
+Users ||--o{ TicketComments
 
-tickets ||--o{ ticket_attachments
-users ||--o{ ticket_attachments
+Tickets ||--o{ TicketAttachments
+Users ||--o{ TicketAttachments
 
-users ||--o{ notifications
-tickets ||--o{ notifications
+Users ||--o{ Notifications
+Tickets ||--o{ Notifications
 
-tickets ||--o{ ticket_assignment_history
-users ||--o{ ticket_assignment_history
+Tickets ||--o{ TicketAssignmentHistory
+Users ||--o{ TicketAssignmentHistory
 
-tickets ||--o{ ticket_status_history
-statuses ||--o{ ticket_status_history
-users ||--o{ ticket_status_history
+Tickets ||--o{ TicketStatusHistory
+Statuses ||--o{ TicketStatusHistory
+Users ||--o{ TicketStatusHistory
 
-users ||--o{ activity_logs
+Users ||--o{ ActivityLogs
 
 @enduml
