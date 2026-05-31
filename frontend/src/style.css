@@ -5,50 +5,34 @@
 
 body {
   margin: 0;
-  background: #f4f4f4;
+  background: #f4f6f8;
+  color: #222;
 }
 
-.page {
+.login-page {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.card {
+.login-card {
   width: 420px;
   background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  border-radius: 14px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
-h1 {
+.login-card h1 {
   margin: 0;
   text-align: center;
 }
 
 .subtitle {
   text-align: center;
-  color: #777;
-  margin-bottom: 25px;
-}
-
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.tabs button {
-  flex: 1;
-  background: #eee;
-  color: #333;
-}
-
-.tabs .active {
-  background: #222;
-  color: white;
+  color: #666;
+  margin-bottom: 26px;
 }
 
 form {
@@ -57,13 +41,12 @@ form {
 }
 
 label {
-  margin-top: 12px;
+  margin-top: 14px;
   margin-bottom: 6px;
   font-weight: bold;
 }
 
-input,
-select {
+input {
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -74,26 +57,119 @@ button {
   padding: 12px;
   border: none;
   border-radius: 8px;
-  background: #222;
+  background: #1f2937;
   color: white;
   cursor: pointer;
   font-weight: bold;
 }
 
 button:hover {
-  background: #444;
+  background: #374151;
+}
+
+.note {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #777;
+  text-align: center;
 }
 
 .message {
-  margin-top: 18px;
+  margin-top: 16px;
   text-align: center;
-  color: #333;
   font-weight: bold;
 }
 
-.dashboard-box {
-  background: #f4f4f4;
-  padding: 16px;
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 240px;
+  background: #111827;
+  color: white;
+  padding: 24px;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  margin-bottom: 30px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sidebar span {
+  padding: 10px;
   border-radius: 8px;
-  margin-top: 20px;
+  color: #d1d5db;
+}
+
+.sidebar .active-link {
+  background: #374151;
+  color: white;
+}
+
+.main-content {
+  flex: 1;
+  padding: 28px;
+}
+
+.topbar {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+}
+
+.topbar h1 {
+  margin: 0;
+}
+
+.topbar p {
+  margin: 6px 0 0;
+  color: #666;
+}
+
+.user-info,
+.dashboard-section {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #666;
+}
+
+.stat-card p {
+  margin: 12px 0 0;
+  font-size: 32px;
+  font-weight: bold;
 }

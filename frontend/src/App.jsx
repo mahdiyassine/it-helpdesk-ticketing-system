@@ -3,18 +3,9 @@ import api from "./api/api";
 import "./style.css";
 
 function App() {
-  const [mode, setMode] = useState("login");
-
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
-  });
-
-  const [registerData, setRegisterData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    roleId: 3,
   });
 
   const [message, setMessage] = useState("");
@@ -35,21 +26,6 @@ function App() {
     }
   };
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setMessage("");
-
-    try {
-      const response = await api.post("/Auth/register", registerData);
-
-      localStorage.setItem("token", response.data.token);
-      setUser(response.data);
-      setMessage("Registration successful.");
-    } catch (error) {
-      setMessage(error.response?.data || "Registration failed.");
-    }
-  };
-
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -58,122 +34,100 @@ function App() {
 
   if (user) {
     return (
-      <div className="page">
-        <div className="card">
-          <h1>IT Help Desk</h1>
-          <h2>Welcome, {user.fullName}</h2>
-          <p>Email: {user.email}</p>
-          <p>Role: {user.roleName}</p>
+      <div className="app-layout">
+        <aside className="sidebar">
+          <h2>IT Help Desk</h2>
+          <nav>
+            <span className="active-link">Dashboard</span>
+            <span>Tickets</span>
+            <span>Reports</span>
+            <span>Profile</span>
+          </nav>
+        </aside>
 
-          <div className="dashboard-box">
-            <h3>Protected Dashboard</h3>
-            <p>You are logged in using JWT authentication.</p>
-          </div>
+        <main className="main-content">
+          <header className="topbar">
+            <div>
+              <h1>Dashboard</h1>
+              <p>Welcome back, {user.fullName}</p>
+            </div>
+            <button onClick={logout}>Logout</button>
+          </header>
 
-          <button onClick={logout}>Logout</button>
-          {message && <p className="message">{message}</p>}
-        </div>
+          <section className="user-info">
+            <h3>Logged In User</h3>
+            <p><strong>Name:</strong> {user.fullName}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Role:</strong> {user.roleName}</p>
+          </section>
+
+          <section className="stats-grid">
+            <div className="stat-card">
+              <h3>Open Tickets</h3>
+              <p>0</p>
+            </div>
+
+            <div className="stat-card">
+              <h3>Pending Tickets</h3>
+              <p>0</p>
+            </div>
+
+            <div className="stat-card">
+              <h3>Resolved Tickets</h3>
+              <p>0</p>
+            </div>
+
+            <div className="stat-card">
+              <h3>Critical Tickets</h3>
+              <p>0</p>
+            </div>
+          </section>
+
+          <section className="dashboard-section">
+            <h3>Index Page</h3>
+            <p>
+              This dashboard is the main index page that appears after a successful login.
+              Ticket management features will be added in the next phases.
+            </p>
+          </section>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="page">
-      <div className="card">
+    <div className="login-page">
+      <div className="login-card">
         <h1>IT Help Desk</h1>
-        <p className="subtitle">Authentication Portal</p>
+        <p className="subtitle">Login to access the ticketing system</p>
 
-        <div className="tabs">
-          <button
-            className={mode === "login" ? "active" : ""}
-            onClick={() => setMode("login")}
-          >
-            Login
-          </button>
+        <form onSubmit={handleLogin}>
+          <label>Email</label>
+          <input
+            type="email"
+            value={loginData.email}
+            onChange={(e) =>
+              setLoginData({ ...loginData, email: e.target.value })
+            }
+            required
+          />
 
-          <button
-            className={mode === "register" ? "active" : ""}
-            onClick={() => setMode("register")}
-          >
-            Register
-          </button>
-        </div>
+          <label>Password</label>
+          <input
+            type="password"
+            value={loginData.password}
+            onChange={(e) =>
+              setLoginData({ ...loginData, password: e.target.value })
+            }
+            required
+          />
 
-        {mode === "login" ? (
-          <form onSubmit={handleLogin}>
-            <label>Email</label>
-            <input
-              type="email"
-              value={loginData.email}
-              onChange={(e) =>
-                setLoginData({ ...loginData, email: e.target.value })
-              }
-              required
-            />
+          <button type="submit">Login</button>
+        </form>
 
-            <label>Password</label>
-            <input
-              type="password"
-              value={loginData.password}
-              onChange={(e) =>
-                setLoginData({ ...loginData, password: e.target.value })
-              }
-              required
-            />
-
-            <button type="submit">Login</button>
-          </form>
-        ) : (
-          <form onSubmit={handleRegister}>
-            <label>Full Name</label>
-            <input
-              type="text"
-              value={registerData.fullName}
-              onChange={(e) =>
-                setRegisterData({ ...registerData, fullName: e.target.value })
-              }
-              required
-            />
-
-            <label>Email</label>
-            <input
-              type="email"
-              value={registerData.email}
-              onChange={(e) =>
-                setRegisterData({ ...registerData, email: e.target.value })
-              }
-              required
-            />
-
-            <label>Password</label>
-            <input
-              type="password"
-              value={registerData.password}
-              onChange={(e) =>
-                setRegisterData({ ...registerData, password: e.target.value })
-              }
-              required
-            />
-
-            <label>Role</label>
-            <select
-              value={registerData.roleId}
-              onChange={(e) =>
-                setRegisterData({
-                  ...registerData,
-                  roleId: Number(e.target.value),
-                })
-              }
-            >
-              <option value={1}>Admin</option>
-              <option value={2}>IT Support Agent</option>
-              <option value={3}>Employee</option>
-              <option value={4}>Manager</option>
-            </select>
-
-            <button type="submit">Register</button>
-          </form>
-        )}
+        <p className="note">
+          Accounts are created by the system administrator.
+        </p>
 
         {message && <p className="message">{message}</p>}
       </div>
