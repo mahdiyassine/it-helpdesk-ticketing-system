@@ -129,3 +129,85 @@ it-helpdesk-ticketing-system/
 ├── wireframes/
 │
 └── README.md
+```
+
+## Backend Setup
+
+The backend is built using ASP.NET Core Web API.
+
+### Backend Technologies
+
+- ASP.NET Core Web API
+- Entity Framework Core
+- PostgreSQL
+- JWT Bearer Authentication
+- BCrypt password hashing
+- Swagger API documentation
+
+### Run Backend
+
+```bash
+cd backend/HelpDesk.Api
+dotnet run
+```
+
+Swagger will be available at:
+
+```text
+http://localhost:5291/swagger
+```
+
+## Frontend Setup
+
+The frontend is built using React and Vite.
+
+### Frontend Technologies
+
+- React
+- Vite
+- Axios
+- CSS
+
+### Run Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend will be available at:
+
+```text
+http://localhost:5173
+```
+
+## Database Setup
+
+The project uses PostgreSQL with Entity Framework Core migrations.
+
+Database name:
+
+```text
+HelpDeskDb
+```
+
+Apply migrations:
+
+```bash
+cd backend/HelpDesk.Api
+dotnet ef database update
+```
+
+## Authentication Flow
+
+1. Admin-created user logs in using email and password.
+2. Backend validates the user credentials.
+3. Backend generates a JWT token.
+4. Frontend stores the token in local storage.
+5. User is redirected to the dashboard/index page.
+6. Role-based authorization controls access to protected backend endpoints.
+
+## Project Status
+
+Week 2: Project setup, authentication, role management, and index page completed.
