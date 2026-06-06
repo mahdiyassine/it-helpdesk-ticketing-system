@@ -1,0 +1,5 @@
+backend/HelpDesk.Api/bin/
+backend/HelpDesk.Api/obj/
+frontend/node_modules/
+.env
+.DS_Store
