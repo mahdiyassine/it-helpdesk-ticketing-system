@@ -46,10 +46,18 @@ label {
   font-weight: bold;
 }
 
-input {
+input,
+textarea,
+select {
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
+  width: 100%;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
 }
 
 button {
@@ -76,8 +84,8 @@ button:hover {
 
 .message {
   margin-top: 16px;
-  text-align: center;
   font-weight: bold;
+  color: #1f2937;
 }
 
 .app-layout {
@@ -139,15 +147,6 @@ button:hover {
   color: #666;
 }
 
-.user-info,
-.dashboard-section {
-  background: white;
-  padding: 20px;
-  border-radius: 14px;
-  margin-bottom: 24px;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
-}
-
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -172,4 +171,77 @@ button:hover {
   margin: 12px 0 0;
   font-size: 32px;
   font-weight: bold;
+}
+
+.panel {
+  background: white;
+  padding: 22px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+.ticket-form {
+  max-width: 900px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.button-row {
+  display: flex;
+  gap: 12px;
+}
+
+.secondary-button {
+  background: #6b7280;
+}
+
+.secondary-button:hover {
+  background: #4b5563;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+}
+
+th,
+td {
+  padding: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+th {
+  background: #f9fafb;
+  color: #374151;
+}
+
+.small-button {
+  padding: 8px 12px;
+  margin: 0 8px 0 0;
+  background: #2563eb;
+}
+
+.small-button:hover {
+  background: #1d4ed8;
+}
+
+.danger-button {
+  padding: 8px 12px;
+  margin: 0;
+  background: #dc2626;
+}
+
+.danger-button:hover {
+  background: #b91c1c;
 }

@@ -211,3 +211,52 @@ dotnet ef database update
 ## Project Status
 
 Week 2: Project setup, authentication, role management, and index page completed.
+
+## Week 3 Progress
+
+Week 3 focused on ticket CRUD operations, ticket categories, ticket priorities, and connecting the React frontend with the backend APIs.
+
+### Completed Tasks
+
+- Created Ticket model
+- Created Category model
+- Created Priority model
+- Created Status model
+- Updated Entity Framework database context
+- Added database migration for ticket management
+- Implemented ticket CRUD API endpoints
+- Implemented categories API endpoint
+- Implemented priorities API endpoint
+- Implemented statuses API endpoint
+- Connected React frontend with ticket APIs
+- Created ticket form in React
+- Displayed ticket list in React
+- Added edit/update ticket functionality
+- Added delete ticket functionality
+- Displayed dashboard ticket counters
+
+### Week 3 API Endpoints
+
+#### Tickets
+
+- `GET /api/Tickets`
+- `GET /api/Tickets/{id}`
+- `POST /api/Tickets`
+- `PUT /api/Tickets/{id}`
+- `DELETE /api/Tickets/{id}`
+
+#### Categories
+
+- `GET /api/Categories`
+
+#### Priorities
+
+- `GET /api/Priorities`
+
+#### Statuses
+
+- `GET /api/Statuses`
+
+## Project Status
+
+Week 3: Ticket CRUD operations, categories, priorities, and frontend API connection completed.
