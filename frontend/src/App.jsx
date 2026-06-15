@@ -15,6 +15,13 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [priorities, setPriorities] = useState([]);
   const [statuses, setStatuses] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [activityLogs, setActivityLogs] = useState([]);
+
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [statusHistory, setStatusHistory] = useState([]);
+  const [assignmentHistory, setAssignmentHistory] = useState([]);
 
   const [ticketForm, setTicketForm] = useState({
     title: "",
@@ -24,6 +31,19 @@ function App() {
   });
 
   const [editingTicket, setEditingTicket] = useState(null);
+
+  const [commentForm, setCommentForm] = useState({
+    commentText: "",
+    isInternal: false,
+  });
+
+  const [assignForm, setAssignForm] = useState({
+    assignedToUserId: 1,
+  });
+
+  const [statusForm, setStatusForm] = useState({
+    statusId: 1,
+  });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -42,6 +62,7 @@ function App() {
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
+    setSelectedTicket(null);
     setMessage("Logged out.");
   };
 
@@ -54,16 +75,50 @@ function App() {
     const categoriesResponse = await api.get("/Categories");
     const prioritiesResponse = await api.get("/Priorities");
     const statusesResponse = await api.get("/Statuses");
+    const usersResponse = await api.get("/Users");
 
     setCategories(categoriesResponse.data);
     setPriorities(prioritiesResponse.data);
     setStatuses(statusesResponse.data);
+    setUsers(usersResponse.data);
+  };
+
+  const loadActivityLogs = async () => {
+    const response = await api.get("/ActivityLogs");
+    setActivityLogs(response.data);
+  };
+
+  const loadTicketDetails = async (ticket) => {
+    setSelectedTicket(ticket);
+
+    const commentsResponse = await api.get(`/Tickets/${ticket.id}/comments`);
+    const statusHistoryResponse = await api.get(
+      `/Tickets/${ticket.id}/status-history`
+    );
+    const assignmentHistoryResponse = await api.get(
+      `/Tickets/${ticket.id}/assignment-history`
+    );
+
+    setComments(commentsResponse.data);
+    setStatusHistory(statusHistoryResponse.data);
+    setAssignmentHistory(assignmentHistoryResponse.data);
+
+    const currentStatus = statuses.find((s) => s.statusName === ticket.status);
+    setStatusForm({
+      statusId: currentStatus?.id || 1,
+    });
+
+    const assignedUser = users.find((u) => u.fullName === ticket.assignedToUser);
+    setAssignForm({
+      assignedToUserId: assignedUser?.id || users[0]?.id || 1,
+    });
   };
 
   useEffect(() => {
     if (user) {
       loadTickets();
       loadDropdowns();
+      loadActivityLogs();
     }
   }, [user]);
 
@@ -88,6 +143,7 @@ function App() {
       });
 
       await loadTickets();
+      await loadActivityLogs();
       setMessage("Ticket created successfully.");
     } catch (error) {
       setMessage(error.response?.data || "Failed to create ticket.");
@@ -98,6 +154,7 @@ function App() {
     const category = categories.find((c) => c.categoryName === ticket.category);
     const priority = priorities.find((p) => p.priorityName === ticket.priority);
     const status = statuses.find((s) => s.statusName === ticket.status);
+    const assignedUser = users.find((u) => u.fullName === ticket.assignedToUser);
 
     setEditingTicket({
       id: ticket.id,
@@ -106,7 +163,7 @@ function App() {
       categoryId: category?.id || 1,
       priorityId: priority?.id || 1,
       statusId: status?.id || 1,
-      assignedToUserId: null,
+      assignedToUserId: assignedUser?.id || null,
     });
   };
 
@@ -121,11 +178,14 @@ function App() {
         categoryId: Number(editingTicket.categoryId),
         priorityId: Number(editingTicket.priorityId),
         statusId: Number(editingTicket.statusId),
-        assignedToUserId: editingTicket.assignedToUserId,
+        assignedToUserId: editingTicket.assignedToUserId
+          ? Number(editingTicket.assignedToUserId)
+          : null,
       });
 
       setEditingTicket(null);
       await loadTickets();
+      await loadActivityLogs();
       setMessage("Ticket updated successfully.");
     } catch (error) {
       setMessage(error.response?.data || "Failed to update ticket.");
@@ -140,9 +200,91 @@ function App() {
     try {
       await api.delete(`/Tickets/${id}`);
       await loadTickets();
+      await loadActivityLogs();
+      setSelectedTicket(null);
       setMessage("Ticket deleted successfully.");
     } catch (error) {
       setMessage(error.response?.data || "Failed to delete ticket.");
+    }
+  };
+
+  const handleAssignTicket = async (e) => {
+    e.preventDefault();
+
+    if (!selectedTicket) return;
+
+    try {
+      await api.put(`/Tickets/${selectedTicket.id}/assign`, {
+        assignedToUserId: Number(assignForm.assignedToUserId),
+        assignedByUserId: 1,
+      });
+
+      await loadTickets();
+      await loadActivityLogs();
+
+      const updatedTicket = tickets.find((t) => t.id === selectedTicket.id);
+      if (updatedTicket) {
+        await loadTicketDetails(updatedTicket);
+      }
+
+      setMessage("Ticket assigned successfully.");
+    } catch (error) {
+      setMessage(error.response?.data || "Failed to assign ticket.");
+    }
+  };
+
+  const handleStatusUpdate = async (e) => {
+    e.preventDefault();
+
+    if (!selectedTicket) return;
+
+    try {
+      await api.put(`/Tickets/${selectedTicket.id}/status`, {
+        statusId: Number(statusForm.statusId),
+        changedByUserId: 1,
+      });
+
+      await loadTickets();
+      await loadActivityLogs();
+
+      const refreshedTickets = await api.get("/Tickets");
+      const updatedTicket = refreshedTickets.data.find(
+        (t) => t.id === selectedTicket.id
+      );
+      setTickets(refreshedTickets.data);
+
+      if (updatedTicket) {
+        await loadTicketDetails(updatedTicket);
+      }
+
+      setMessage("Ticket status updated successfully.");
+    } catch (error) {
+      setMessage(error.response?.data || "Failed to update status.");
+    }
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+
+    if (!selectedTicket) return;
+
+    try {
+      await api.post(`/Tickets/${selectedTicket.id}/comments`, {
+        userId: 1,
+        commentText: commentForm.commentText,
+        isInternal: commentForm.isInternal,
+      });
+
+      setCommentForm({
+        commentText: "",
+        isInternal: false,
+      });
+
+      await loadTicketDetails(selectedTicket);
+      await loadActivityLogs();
+      setMessage("Comment added successfully.");
+    } catch (error) {
+      setMessage(error.response?.data || "Failed to add comment.");
     }
   };
 
@@ -192,8 +334,8 @@ function App() {
         <nav>
           <span className="active-link">Dashboard</span>
           <span>Tickets</span>
-          <span>Create Ticket</span>
-          <span>Reports</span>
+          <span>Workflow</span>
+          <span>Activity Logs</span>
           <span>Profile</span>
         </nav>
       </aside>
@@ -404,7 +546,7 @@ function App() {
                 <th>Category</th>
                 <th>Priority</th>
                 <th>Status</th>
-                <th>Created By</th>
+                <th>Assigned To</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -417,8 +559,15 @@ function App() {
                   <td>{ticket.category}</td>
                   <td>{ticket.priority}</td>
                   <td>{ticket.status}</td>
-                  <td>{ticket.createdByUser}</td>
+                  <td>{ticket.assignedToUser || "Unassigned"}</td>
                   <td>
+                    <button
+                      className="small-button"
+                      onClick={() => loadTicketDetails(ticket)}
+                    >
+                      View
+                    </button>
+
                     <button
                       className="small-button"
                       onClick={() => startEdit(ticket)}
@@ -439,6 +588,165 @@ function App() {
               {tickets.length === 0 && (
                 <tr>
                   <td colSpan="7">No tickets found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </section>
+
+        {selectedTicket && (
+          <section className="panel">
+            <h2>Ticket Workflow</h2>
+            <p>
+              <strong>Selected Ticket:</strong> {selectedTicket.ticketReference} -{" "}
+              {selectedTicket.title}
+            </p>
+
+            <div className="workflow-grid">
+              <form onSubmit={handleAssignTicket}>
+                <h3>Assign Ticket</h3>
+                <label>Assign To</label>
+                <select
+                  value={assignForm.assignedToUserId}
+                  onChange={(e) =>
+                    setAssignForm({
+                      ...assignForm,
+                      assignedToUserId: e.target.value,
+                    })
+                  }
+                >
+                  {users.map((systemUser) => (
+                    <option key={systemUser.id} value={systemUser.id}>
+                      {systemUser.fullName} ({systemUser.roleName})
+                    </option>
+                  ))}
+                </select>
+                <button type="submit">Assign</button>
+              </form>
+
+              <form onSubmit={handleStatusUpdate}>
+                <h3>Update Status</h3>
+                <label>Status</label>
+                <select
+                  value={statusForm.statusId}
+                  onChange={(e) =>
+                    setStatusForm({ ...statusForm, statusId: e.target.value })
+                  }
+                >
+                  {statuses.map((status) => (
+                    <option key={status.id} value={status.id}>
+                      {status.statusName}
+                    </option>
+                  ))}
+                </select>
+                <button type="submit">Update Status</button>
+              </form>
+
+              <form onSubmit={handleAddComment}>
+                <h3>Add Comment</h3>
+                <label>Comment</label>
+                <textarea
+                  value={commentForm.commentText}
+                  onChange={(e) =>
+                    setCommentForm({
+                      ...commentForm,
+                      commentText: e.target.value,
+                    })
+                  }
+                  required
+                />
+
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={commentForm.isInternal}
+                    onChange={(e) =>
+                      setCommentForm({
+                        ...commentForm,
+                        isInternal: e.target.checked,
+                      })
+                    }
+                  />
+                  Internal Note
+                </label>
+
+                <button type="submit">Add Comment</button>
+              </form>
+            </div>
+
+            <div className="history-grid">
+              <div>
+                <h3>Comments</h3>
+                {comments.map((comment) => (
+                  <div className="history-card" key={comment.id}>
+                    <p>{comment.commentText}</p>
+                    <small>
+                      {comment.userFullName} -{" "}
+                      {comment.isInternal ? "Internal" : "Public"}
+                    </small>
+                  </div>
+                ))}
+                {comments.length === 0 && <p>No comments yet.</p>}
+              </div>
+
+              <div>
+                <h3>Status History</h3>
+                {statusHistory.map((history) => (
+                  <div className="history-card" key={history.id}>
+                    <p>
+                      {history.oldStatus || "None"} → {history.newStatus}
+                    </p>
+                    <small>Changed by {history.changedByUser}</small>
+                  </div>
+                ))}
+                {statusHistory.length === 0 && <p>No status history yet.</p>}
+              </div>
+
+              <div>
+                <h3>Assignment History</h3>
+                {assignmentHistory.map((history) => (
+                  <div className="history-card" key={history.id}>
+                    <p>
+                      {history.assignedFromUser || "Unassigned"} →{" "}
+                      {history.assignedToUser}
+                    </p>
+                    <small>Assigned by {history.assignedByUser}</small>
+                  </div>
+                ))}
+                {assignmentHistory.length === 0 && (
+                  <p>No assignment history yet.</p>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section className="panel">
+          <h2>Activity Logs</h2>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Description</th>
+                <th>User</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {activityLogs.map((log) => (
+                <tr key={log.id}>
+                  <td>{log.action}</td>
+                  <td>{log.description}</td>
+                  <td>{log.userFullName || "System"}</td>
+                  <td>{new Date(log.createdAt).toLocaleString()}</td>
+                </tr>
+              ))}
+
+              {activityLogs.length === 0 && (
+                <tr>
+                  <td colSpan="4">No activity logs found.</td>
                 </tr>
               )}
             </tbody>

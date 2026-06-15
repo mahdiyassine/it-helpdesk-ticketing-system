@@ -16,6 +16,11 @@ public class AppDbContext : DbContext
     public DbSet<Priority> Priorities { get; set; }
     public DbSet<Status> Statuses { get; set; }
 
+    public DbSet<TicketComment> TicketComments { get; set; }
+    public DbSet<ActivityLog> ActivityLogs { get; set; }
+    public DbSet<TicketStatusHistory> TicketStatusHistory { get; set; }
+    public DbSet<TicketAssignmentHistory> TicketAssignmentHistory { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -101,5 +106,71 @@ public class AppDbContext : DbContext
             .HasOne(t => t.Status)
             .WithMany(s => s.Tickets)
             .HasForeignKey(t => t.StatusId);
+
+        modelBuilder.Entity<TicketComment>()
+            .HasOne(tc => tc.Ticket)
+            .WithMany()
+            .HasForeignKey(tc => tc.TicketId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<TicketComment>()
+            .HasOne(tc => tc.User)
+            .WithMany()
+            .HasForeignKey(tc => tc.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ActivityLog>()
+            .HasOne(al => al.User)
+            .WithMany()
+            .HasForeignKey(al => al.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<TicketStatusHistory>()
+            .HasOne(tsh => tsh.Ticket)
+            .WithMany()
+            .HasForeignKey(tsh => tsh.TicketId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<TicketStatusHistory>()
+            .HasOne(tsh => tsh.OldStatus)
+            .WithMany()
+            .HasForeignKey(tsh => tsh.OldStatusId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<TicketStatusHistory>()
+            .HasOne(tsh => tsh.NewStatus)
+            .WithMany()
+            .HasForeignKey(tsh => tsh.NewStatusId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<TicketStatusHistory>()
+            .HasOne(tsh => tsh.ChangedByUser)
+            .WithMany()
+            .HasForeignKey(tsh => tsh.ChangedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<TicketAssignmentHistory>()
+            .HasOne(tah => tah.Ticket)
+            .WithMany()
+            .HasForeignKey(tah => tah.TicketId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<TicketAssignmentHistory>()
+            .HasOne(tah => tah.AssignedFromUser)
+            .WithMany()
+            .HasForeignKey(tah => tah.AssignedFromUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<TicketAssignmentHistory>()
+            .HasOne(tah => tah.AssignedToUser)
+            .WithMany()
+            .HasForeignKey(tah => tah.AssignedToUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<TicketAssignmentHistory>()
+            .HasOne(tah => tah.AssignedByUser)
+            .WithMany()
+            .HasForeignKey(tah => tah.AssignedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -260,3 +260,59 @@ Week 3 focused on ticket CRUD operations, ticket categories, ticket priorities, 
 ## Project Status
 
 Week 3: Ticket CRUD operations, categories, priorities, and frontend API connection completed.
+
+## Week 4 Progress
+
+Week 4 focused on ticket assignment workflow, ticket status updates, comments, activity logs, and ticket history tracking.
+
+### Completed Tasks
+
+- Created TicketComment model
+- Created ActivityLog model
+- Created TicketStatusHistory model
+- Created TicketAssignmentHistory model
+- Updated Entity Framework database context
+- Added database migration for workflow and history tables
+- Implemented ticket assignment endpoint
+- Implemented ticket status update endpoint
+- Implemented ticket comments endpoints
+- Implemented ticket status history endpoint
+- Implemented ticket assignment history endpoint
+- Implemented activity logs endpoint
+- Added users endpoint for assignment dropdown
+- Connected React frontend with workflow APIs
+- Added ticket assignment UI
+- Added ticket status update UI
+- Added ticket comments UI
+- Added ticket history display
+- Added activity logs display
+
+### Week 4 API Endpoints
+
+#### Ticket Workflow
+
+- `PUT /api/Tickets/{id}/assign`
+- `PUT /api/Tickets/{id}/status`
+
+#### Ticket Comments
+
+- `POST /api/Tickets/{id}/comments`
+- `GET /api/Tickets/{id}/comments`
+
+#### Ticket History
+
+- `GET /api/Tickets/{id}/status-history`
+- `GET /api/Tickets/{id}/assignment-history`
+
+#### Activity Logs
+
+- `GET /api/ActivityLogs`
+
+#### Users
+
+- `GET /api/Users`
+- `GET /api/Users/agents`
+
+## Project Status
+
+Week 4: Ticket assignment workflow, comments, status updates, activity logs, and history tracking completed.
