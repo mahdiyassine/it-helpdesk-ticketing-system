@@ -316,3 +316,49 @@ Week 4 focused on ticket assignment workflow, ticket status updates, comments, a
 ## Project Status
 
 Week 4: Ticket assignment workflow, comments, status updates, activity logs, and history tracking completed.
+
+## Week 5 Progress
+
+Week 5 focused on dashboard analytics, notifications, and ticket file attachments.
+
+### Completed Tasks
+
+- Created Notification model
+- Created TicketAttachment model
+- Updated database context
+- Added migration for notifications and attachments
+- Implemented dashboard analytics endpoint
+- Implemented notification center endpoints
+- Implemented ticket file upload endpoint
+- Implemented attachment listing and download endpoints
+- Added KPI cards to React dashboard
+- Added charts using Recharts
+- Added notification center to frontend
+- Added file upload section to ticket workflow
+- Added attachment list and download button
+- Updated activity logs for notification and upload actions
+
+### Week 5 API Endpoints
+
+#### Dashboard
+
+- `GET /api/Dashboard/stats`
+
+#### Notifications
+
+- `GET /api/Notifications`
+- `GET /api/Notifications/user/{userId}`
+- `POST /api/Notifications`
+- `PUT /api/Notifications/{id}/read`
+- `PUT /api/Notifications/user/{userId}/read-all`
+
+#### Ticket Attachments
+
+- `POST /api/TicketAttachments/ticket/{ticketId}/upload`
+- `GET /api/TicketAttachments/ticket/{ticketId}`
+- `GET /api/TicketAttachments/{id}/download`
+- `DELETE /api/TicketAttachments/{id}`
+
+## Project Status
+
+Week 5: Dashboard analytics, notifications, ticket attachments, charts, and upload functionality completed.

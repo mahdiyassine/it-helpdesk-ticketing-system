@@ -1,4 +1,15 @@
 import { useEffect, useState } from "react";
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import api from "./api/api";
 import "./style.css";
 
@@ -16,12 +27,16 @@ function App() {
   const [priorities, setPriorities] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [users, setUsers] = useState([]);
+
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [notifications, setNotifications] = useState([]);
   const [activityLogs, setActivityLogs] = useState([]);
 
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [comments, setComments] = useState([]);
   const [statusHistory, setStatusHistory] = useState([]);
   const [assignmentHistory, setAssignmentHistory] = useState([]);
+  const [attachments, setAttachments] = useState([]);
 
   const [ticketForm, setTicketForm] = useState({
     title: "",
@@ -44,6 +59,8 @@ function App() {
   const [statusForm, setStatusForm] = useState({
     statusId: 1,
   });
+
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -83,9 +100,24 @@ function App() {
     setUsers(usersResponse.data);
   };
 
+  const loadDashboardStats = async () => {
+    const response = await api.get("/Dashboard/stats");
+    setDashboardStats(response.data);
+  };
+
+  const loadNotifications = async () => {
+    const response = await api.get("/Notifications");
+    setNotifications(response.data);
+  };
+
   const loadActivityLogs = async () => {
     const response = await api.get("/ActivityLogs");
     setActivityLogs(response.data);
+  };
+
+  const loadAttachments = async (ticketId) => {
+    const response = await api.get(`/TicketAttachments/ticket/${ticketId}`);
+    setAttachments(response.data);
   };
 
   const loadTicketDetails = async (ticket) => {
@@ -102,6 +134,7 @@ function App() {
     setComments(commentsResponse.data);
     setStatusHistory(statusHistoryResponse.data);
     setAssignmentHistory(assignmentHistoryResponse.data);
+    await loadAttachments(ticket.id);
 
     const currentStatus = statuses.find((s) => s.statusName === ticket.status);
     setStatusForm({
@@ -114,10 +147,19 @@ function App() {
     });
   };
 
+  const refreshDashboardData = async () => {
+    await loadTickets();
+    await loadDashboardStats();
+    await loadNotifications();
+    await loadActivityLogs();
+  };
+
   useEffect(() => {
     if (user) {
       loadTickets();
       loadDropdowns();
+      loadDashboardStats();
+      loadNotifications();
       loadActivityLogs();
     }
   }, [user]);
@@ -142,8 +184,7 @@ function App() {
         priorityId: 1,
       });
 
-      await loadTickets();
-      await loadActivityLogs();
+      await refreshDashboardData();
       setMessage("Ticket created successfully.");
     } catch (error) {
       setMessage(error.response?.data || "Failed to create ticket.");
@@ -184,8 +225,7 @@ function App() {
       });
 
       setEditingTicket(null);
-      await loadTickets();
-      await loadActivityLogs();
+      await refreshDashboardData();
       setMessage("Ticket updated successfully.");
     } catch (error) {
       setMessage(error.response?.data || "Failed to update ticket.");
@@ -199,8 +239,7 @@ function App() {
 
     try {
       await api.delete(`/Tickets/${id}`);
-      await loadTickets();
-      await loadActivityLogs();
+      await refreshDashboardData();
       setSelectedTicket(null);
       setMessage("Ticket deleted successfully.");
     } catch (error) {
@@ -219,14 +258,19 @@ function App() {
         assignedByUserId: 1,
       });
 
-      await loadTickets();
-      await loadActivityLogs();
+      const refreshedTickets = await api.get("/Tickets");
+      const updatedTicket = refreshedTickets.data.find(
+        (t) => t.id === selectedTicket.id
+      );
 
-      const updatedTicket = tickets.find((t) => t.id === selectedTicket.id);
+      setTickets(refreshedTickets.data);
+
       if (updatedTicket) {
         await loadTicketDetails(updatedTicket);
       }
 
+      await loadDashboardStats();
+      await loadActivityLogs();
       setMessage("Ticket assigned successfully.");
     } catch (error) {
       setMessage(error.response?.data || "Failed to assign ticket.");
@@ -244,19 +288,19 @@ function App() {
         changedByUserId: 1,
       });
 
-      await loadTickets();
-      await loadActivityLogs();
-
       const refreshedTickets = await api.get("/Tickets");
       const updatedTicket = refreshedTickets.data.find(
         (t) => t.id === selectedTicket.id
       );
+
       setTickets(refreshedTickets.data);
 
       if (updatedTicket) {
         await loadTicketDetails(updatedTicket);
       }
 
+      await loadDashboardStats();
+      await loadActivityLogs();
       setMessage("Ticket status updated successfully.");
     } catch (error) {
       setMessage(error.response?.data || "Failed to update status.");
@@ -286,6 +330,65 @@ function App() {
     } catch (error) {
       setMessage(error.response?.data || "Failed to add comment.");
     }
+  };
+
+  const handleUploadAttachment = async (e) => {
+    e.preventDefault();
+
+    if (!selectedTicket || !selectedFile) {
+      setMessage("Please select a ticket and file first.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("uploadedByUserId", 1);
+    formData.append("file", selectedFile);
+
+    try {
+      await api.post(
+        `/TicketAttachments/ticket/${selectedTicket.id}/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setSelectedFile(null);
+      await loadAttachments(selectedTicket.id);
+      await loadDashboardStats();
+      await loadNotifications();
+      await loadActivityLogs();
+      setMessage("File uploaded successfully.");
+    } catch (error) {
+      setMessage(error.response?.data || "Failed to upload file.");
+    }
+  };
+
+  const handleMarkNotificationRead = async (id) => {
+    try {
+      await api.put(`/Notifications/${id}/read`);
+      await loadNotifications();
+      await loadDashboardStats();
+    } catch (error) {
+      setMessage(error.response?.data || "Failed to mark notification as read.");
+    }
+  };
+
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await api.put("/Notifications/user/1/read-all");
+      await loadNotifications();
+      await loadDashboardStats();
+      setMessage("All notifications marked as read.");
+    } catch (error) {
+      setMessage(error.response?.data || "Failed to mark all as read.");
+    }
+  };
+
+  const downloadAttachment = (id) => {
+    window.open(`http://localhost:5291/api/TicketAttachments/${id}/download`);
   };
 
   if (!user) {
@@ -335,8 +438,8 @@ function App() {
           <span className="active-link">Dashboard</span>
           <span>Tickets</span>
           <span>Workflow</span>
+          <span>Notifications</span>
           <span>Activity Logs</span>
-          <span>Profile</span>
         </nav>
       </aside>
 
@@ -352,22 +455,108 @@ function App() {
         <section className="stats-grid">
           <div className="stat-card">
             <h3>Total Tickets</h3>
-            <p>{tickets.length}</p>
+            <p>{dashboardStats?.totalTickets ?? tickets.length}</p>
           </div>
 
           <div className="stat-card">
-            <h3>Open Tickets</h3>
-            <p>{tickets.filter((t) => t.status === "Open").length}</p>
+            <h3>Open</h3>
+            <p>{dashboardStats?.openTickets ?? 0}</p>
           </div>
 
           <div className="stat-card">
-            <h3>Pending Tickets</h3>
-            <p>{tickets.filter((t) => t.status === "Pending").length}</p>
+            <h3>In Progress</h3>
+            <p>{dashboardStats?.inProgressTickets ?? 0}</p>
           </div>
 
           <div className="stat-card">
-            <h3>Resolved Tickets</h3>
-            <p>{tickets.filter((t) => t.status === "Resolved").length}</p>
+            <h3>Resolved</h3>
+            <p>{dashboardStats?.resolvedTickets ?? 0}</p>
+          </div>
+
+          <div className="stat-card">
+            <h3>Unread Notifications</h3>
+            <p>{dashboardStats?.unreadNotifications ?? 0}</p>
+          </div>
+
+          <div className="stat-card">
+            <h3>Attachments</h3>
+            <p>{dashboardStats?.totalAttachments ?? 0}</p>
+          </div>
+        </section>
+
+        <section className="charts-grid">
+          <div className="panel">
+            <h2>Tickets by Status</h2>
+            <div className="chart-box">
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={dashboardStats?.ticketsByStatus || []}>
+                  <XAxis dataKey="name" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="count" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="panel">
+            <h2>Tickets by Priority</h2>
+            <div className="chart-box">
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie
+                    data={dashboardStats?.ticketsByPriority || []}
+                    dataKey="count"
+                    nameKey="name"
+                    outerRadius={90}
+                    label
+                  >
+                    {(dashboardStats?.ticketsByPriority || []).map((entry, index) => (
+                      <Cell key={`cell-${index}`} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </section>
+
+        <section className="panel">
+          <h2>Notification Center</h2>
+
+          <button className="secondary-button" onClick={handleMarkAllNotificationsRead}>
+            Mark All as Read
+          </button>
+
+          <div className="notification-list">
+            {notifications.map((notification) => (
+              <div
+                className={
+                  notification.isRead
+                    ? "notification-card"
+                    : "notification-card unread"
+                }
+                key={notification.id}
+              >
+                <div>
+                  <h3>{notification.title}</h3>
+                  <p>{notification.message}</p>
+                  <small>{new Date(notification.createdAt).toLocaleString()}</small>
+                </div>
+
+                {!notification.isRead && (
+                  <button
+                    className="small-button"
+                    onClick={() => handleMarkNotificationRead(notification.id)}
+                  >
+                    Mark Read
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {notifications.length === 0 && <p>No notifications found.</p>}
           </div>
         </section>
 
@@ -596,7 +785,7 @@ function App() {
 
         {selectedTicket && (
           <section className="panel">
-            <h2>Ticket Workflow</h2>
+            <h2>Ticket Workflow & Attachments</h2>
             <p>
               <strong>Selected Ticket:</strong> {selectedTicket.ticketReference} -{" "}
               {selectedTicket.title}
@@ -672,9 +861,39 @@ function App() {
 
                 <button type="submit">Add Comment</button>
               </form>
+
+              <form onSubmit={handleUploadAttachment}>
+                <h3>Upload File</h3>
+                <label>Screenshot / Document</label>
+                <input
+                  type="file"
+                  onChange={(e) => setSelectedFile(e.target.files[0])}
+                />
+                <button type="submit">Upload File</button>
+              </form>
             </div>
 
             <div className="history-grid">
+              <div>
+                <h3>Attachments</h3>
+                {attachments.map((attachment) => (
+                  <div className="history-card" key={attachment.id}>
+                    <p>{attachment.fileName}</p>
+                    <small>
+                      Uploaded by {attachment.uploadedByUser} -{" "}
+                      {(attachment.fileSize / 1024).toFixed(1)} KB
+                    </small>
+                    <button
+                      className="small-button"
+                      onClick={() => downloadAttachment(attachment.id)}
+                    >
+                      Download
+                    </button>
+                  </div>
+                ))}
+                {attachments.length === 0 && <p>No attachments uploaded.</p>}
+              </div>
+
               <div>
                 <h3>Comments</h3>
                 {comments.map((comment) => (

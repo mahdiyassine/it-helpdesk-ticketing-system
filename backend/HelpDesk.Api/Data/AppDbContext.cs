@@ -20,6 +20,8 @@ public class AppDbContext : DbContext
     public DbSet<ActivityLog> ActivityLogs { get; set; }
     public DbSet<TicketStatusHistory> TicketStatusHistory { get; set; }
     public DbSet<TicketAssignmentHistory> TicketAssignmentHistory { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<TicketAttachment> TicketAttachments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -171,6 +173,23 @@ public class AppDbContext : DbContext
             .HasOne(tah => tah.AssignedByUser)
             .WithMany()
             .HasForeignKey(tah => tah.AssignedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany()
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<TicketAttachment>()
+            .HasOne(ta => ta.Ticket)
+            .WithMany()
+            .HasForeignKey(ta => ta.TicketId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<TicketAttachment>()
+            .HasOne(ta => ta.UploadedByUser)
+            .WithMany()
+            .HasForeignKey(ta => ta.UploadedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
